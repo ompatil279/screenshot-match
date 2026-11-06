@@ -7,7 +7,7 @@ import type {
 
 /** Base URL comes only from build-time env. Never hardcode a fallback backend. */
 export function getApiBaseUrl(): string | null {
-  const raw = (import.meta.env.VITE_ATLAS_API_URL as string | undefined)?.trim();
+  const raw = (import.meta.env["VITE_ATLAS_API_URL"] as string | undefined)?.trim();
   return raw ? raw.replace(/\/+$/, "") : null;
 }
 
@@ -18,7 +18,7 @@ const DEFAULT_TIMEOUT_MS = 12_000;
 interface RequestOptions {
   method?: "GET" | "POST";
   body?: unknown;
-  signal?: AbortSignal;
+  signal?: AbortSignal | undefined;
   timeoutMs?: number;
   validate: (json: unknown) => boolean;
 }
@@ -46,7 +46,7 @@ async function request<T>(path: string, opts: RequestOptions): Promise<ApiResult
     const res = await fetch(`${base}${path}`, {
       method: opts.method ?? "GET",
       headers: opts.body ? { "content-type": "application/json", accept: "application/json" } : { accept: "application/json" },
-      body: opts.body ? JSON.stringify(opts.body) : undefined,
+      ...(opts.body ? { body: JSON.stringify(opts.body) } : {}),
       signal: controller.signal,
     });
     if (!res.ok) {
@@ -78,13 +78,13 @@ export const atlasApi = {
   lookupSelector(selector: string, signal?: AbortSignal) {
     return request<FunctionLookupResponse>(`/v1/functions/${encodeURIComponent(selector)}`, {
       signal,
-      validate: (j) => isObj(j) && Array.isArray(j.results),
+      validate: (j) => isObj(j) && Array.isArray(j["results"]),
     });
   },
   searchSignatures(q: string, signal?: AbortSignal) {
     return request<FunctionLookupResponse>(`/v1/functions?q=${encodeURIComponent(q)}`, {
       signal,
-      validate: (j) => isObj(j) && Array.isArray(j.results),
+      validate: (j) => isObj(j) && Array.isArray(j["results"]),
     });
   },
   decodeCalldata(calldata: string, signal?: AbortSignal) {
@@ -92,14 +92,14 @@ export const atlasApi = {
       method: "POST",
       body: { calldata },
       signal,
-      validate: (j) => isObj(j) && typeof j.selector === "string" && Array.isArray(j.candidates),
+      validate: (j) => isObj(j) && typeof j["selector"] === "string" && Array.isArray(j["candidates"]),
     });
   },
   health(signal?: AbortSignal) {
     return request<HealthResponse>(`/v1/health`, {
       signal,
       timeoutMs: 6_000,
-      validate: (j) => isObj(j) && typeof j.status === "string",
+      validate: (j) => isObj(j) && typeof j["status"] === "string",
     });
   },
 };

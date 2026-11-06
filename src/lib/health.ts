@@ -33,8 +33,8 @@ export function useIntegrationState(key: IntegrationKey): { state: IntegrationSt
   if (!isApiConfigured()) return { state: "not_configured" };
   if (q.isPending || q.isFetching) return { state: "connecting" };
   const r = q.data;
-  if (!r || !r.ok) return { state: "unavailable", detail: r && !r.ok ? r.message : undefined };
+  if (!r || !r.ok) return r && !r.ok ? { state: "unavailable", detail: r.message } : { state: "unavailable" };
   const entry = r.data.integrations?.[key];
   if (!entry) return { state: "not_configured", detail: "The API did not report this integration." };
-  return entry;
+  return { state: entry.status, ...(entry.detail ? { detail: entry.detail } : {}), ...(entry.network ? { network: entry.network } : {}) };
 }

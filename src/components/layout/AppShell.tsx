@@ -21,7 +21,7 @@ function isActive(path: string, to: string) {
   return to === "/" ? path === "/" : path === to || path.startsWith(to + "/");
 }
 
-function NavLink({ item, collapsed, onNavigate }: { item: NavItem; collapsed: boolean; onNavigate?: () => void }) {
+function NavLink({ item, collapsed, onNavigate }: { item: NavItem; collapsed: boolean; onNavigate?: (() => void) | undefined }) {
   const path = useActivePath();
   const active = isActive(path, item.to);
   const link = (
@@ -50,7 +50,7 @@ function NavLink({ item, collapsed, onNavigate }: { item: NavItem; collapsed: bo
   );
 }
 
-function SidebarNav({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
+function SidebarNav({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: (() => void) | undefined }) {
   return (
     <nav aria-label="Primary" className="flex flex-col gap-5">
       {navGroups.map((g) => (

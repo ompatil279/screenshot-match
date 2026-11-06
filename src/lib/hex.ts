@@ -41,7 +41,6 @@ export function checkCalldata(input: string): CalldataCheck {
     selector: v.slice(0, 10).toLowerCase(),
     bytes,
     argWords: Math.floor(argBytes / 32),
-    error: argBytes % 32 !== 0 ? undefined : undefined,
   };
 }
 
